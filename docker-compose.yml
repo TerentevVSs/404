@@ -1,0 +1,50 @@
+version: '3.9'
+services:
+  database:
+    image: postgres:14.3
+    restart: on-failure
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - postgres_backups:/backups
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+
+  backend:
+    depends_on:
+      - database
+    build:
+      context: app
+      dockerfile: Dockerfile
+      args:
+        DEBUG: ${DEBUG}
+        PROJECT_NAME: ${PROJECT_NAME}
+        SERVER_NAME: ${SERVER_NAME}
+        PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+        APP_PORT: ${APP_PORT}
+        VERSION: ${VERSION}
+        PRETRAINED_MODEL_CACHE_DIR: ${PRETRAINED_MODEL_CACHE_DIR}
+        POSTGRES_HOST: ${POSTGRES_HOST}
+        POSTGRES_PORT: ${POSTGRES_PORT}
+        POSTGRES_DB: ${POSTGRES_DB}
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    volumes:
+      - ./.models:/app/${PRETRAINED_MODEL_CACHE_DIR}
+    privileged: true
+
+volumes:
+  postgres_data:
+    driver: local
+  postgres_backups:
+    driver: local

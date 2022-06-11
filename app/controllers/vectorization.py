@@ -1,8 +1,7 @@
-from typing import List
-
 import numpy as np
-from transformers import AutoTokenizer, AutoModel
 import torch
+from transformers import AutoTokenizer, AutoModel
+
 from config import get_settings
 
 settings = get_settings()
@@ -28,11 +27,10 @@ def mean_pooling(model_output, attention_mask):
         input_mask_expanded.sum(1), min=1e-9)
 
 
-def get_vector(text: str) -> List:
+def get_vector(text: str) -> np.array:
     # Tokenize sentences
     encoded_input = tokenizer(text, padding=True, truncation=True,
                               return_tensors='pt')
-
     # Compute token embeddings
     with torch.no_grad():
         model_output = model(**encoded_input)

@@ -1,0 +1,16 @@
+[Unit]
+Description=Fake News
+After=network.target
+
+[Service]
+User=root
+
+WorkingDirectory=/app
+LimitNOFILE=4096
+ExecStart=/usr/local/bin/gunicorn -c gunicorn_conf.py gunicorn_app:app
+Restart=on-failure
+RestartSec=5s
+EnvironmentFile=/etc/sysconfig/backend
+
+[Install]
+WantedBy=multi-user.target
