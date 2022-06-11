@@ -1,7 +1,10 @@
+from typing import List
+
 import numpy as np
 from transformers import AutoTokenizer, AutoModel
 import torch
 from config import get_settings
+
 settings = get_settings()
 
 # Load model from HuggingFace Hub
@@ -17,14 +20,15 @@ model = AutoModel.from_pretrained(
 
 # Mean Pooling - Take attention mask into account for correct averaging
 def mean_pooling(model_output, attention_mask):
-    token_embeddings = model_output[0]  # First element of model_output contains all token embeddings
+    token_embeddings = model_output[
+        0]  # First element of model_output contains all token embeddings
     input_mask_expanded = attention_mask.unsqueeze(-1).expand(
         token_embeddings.size()).float()
     return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(
         input_mask_expanded.sum(1), min=1e-9)
 
 
-def get_vector(text: str) -> np.ndarray:
+def get_vector(text: str) -> List:
     # Tokenize sentences
     encoded_input = tokenizer(text, padding=True, truncation=True,
                               return_tensors='pt')
@@ -35,5 +39,5 @@ def get_vector(text: str) -> np.ndarray:
 
     # Perform pooling. In this case, max pooling.
     sentence_embeddings = \
-    mean_pooling(model_output, encoded_input['attention_mask'])[0]
-    return sentence_embeddings
+        mean_pooling(model_output, encoded_input['attention_mask'])[0]
+    return sentence_embeddings.cpu().numpy().tolist()

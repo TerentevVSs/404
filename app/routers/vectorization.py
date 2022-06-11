@@ -1,12 +1,10 @@
 import json
-import logging
 
 from fastapi import APIRouter, Form
+from loguru import logger
 from starlette.responses import Response
 
 from controllers.vectorization import get_vector
-
-from loguru import logger
 
 router = APIRouter(tags=['vectors'])
 
