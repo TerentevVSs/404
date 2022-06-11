@@ -4,15 +4,15 @@ import torch
 from config import get_settings
 settings = get_settings()
 
-# # Load model from HuggingFace Hub
-# tokenizer = AutoTokenizer.from_pretrained(
-#     pretrained_model_name_or_path='sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-#     cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
-# )
-# model = AutoModel.from_pretrained(
-#     pretrained_model_name_or_path='sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
-#     cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
-# )
+# Load model from HuggingFace Hub
+tokenizer = AutoTokenizer.from_pretrained(
+    pretrained_model_name_or_path='sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+    cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
+)
+model = AutoModel.from_pretrained(
+    pretrained_model_name_or_path='sentence-transformers/paraphrase-multilingual-mpnet-base-v2',
+    cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
+)
 
 
 # Mean Pooling - Take attention mask into account for correct averaging
