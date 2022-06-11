@@ -3,10 +3,10 @@ Description=Gunicorn instance to serve common_vectorization
 After=network.target
 
 [Service]
-User=404
+User=notfound
 Group=www-data
-WorkingDirectory=/home/404/404/common_vectorization
-ExecStart=gunicorn --bind unix:myproj.sock -w 1 -k uvicorn.workers.UvicornWorker api:app --reload
+WorkingDirectory=/home/notfound/404/common_vectorization
+ExecStart=gunicorn --bind unix:common_vectorization.sock -w 1 -k uvicorn.workers.UvicornWorker api:app --reload
 
 [Install]
 WantedBy=multi-user.target
