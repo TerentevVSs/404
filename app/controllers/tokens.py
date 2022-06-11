@@ -3,7 +3,7 @@ import random
 import pandas as pd
 
 class Tokens:
-    def __init__(self, filepath=os.path.join('..', 'data', 'token_clusters.csv')):
+    def __init__(self, filepath=os.path.join('..', '..','data', 'token_clusters.csv')):
         self.filepath = filepath
         self.df = self.load_tokens()
         self.mapping_by_cluster = self.create_mapping_by_cluster()

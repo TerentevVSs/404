@@ -23,10 +23,12 @@ Mako==1.2.0
 MarkupSafe==2.1.1
 numpy==1.22.4
 packaging==21.3
+pandas==1.4.2
 prompt-toolkit==3.0.29
 psycopg2-binary==2.9.3
 pydantic==1.9.1
 pyparsing==3.0.9
+python-dateutil==2.8.2
 python-dotenv==0.20.0
 python-multipart==0.0.5
 pytz==2022.1
