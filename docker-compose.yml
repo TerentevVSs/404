@@ -68,16 +68,48 @@ services:
 
   celery_worker:
     image: backend
-    command: celery worker -A workers.core worker -l INFO -f logs/celery_worker.log --concurrency 4
+    command: celery -A workers.core worker -l INFO -f logs/celery_worker.log --concurrency 4
     depends_on:
       - database
       - redis
+    environment:
+      DEBUG: ${DEBUG}
+      PROJECT_NAME: ${PROJECT_NAME}
+      SERVER_NAME: ${SERVER_NAME}
+      PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+      APP_PORT: ${APP_PORT}
+      VERSION: ${VERSION}
+      PRETRAINED_MODEL_CACHE_DIR: ${PRETRAINED_MODEL_CACHE_DIR}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
       - ./logs:/app/logs
 
   celery_scheduler:
     image: backend
     command: celery -A workers.core beat -l INFO --scheduler celery_sqlalchemy_scheduler:DatabaseScheduler -f logs/celery_scheduler.log
+    environment:
+      DEBUG: ${DEBUG}
+      PROJECT_NAME: ${PROJECT_NAME}
+      SERVER_NAME: ${SERVER_NAME}
+      PROJECT_DESCRIPTION: ${PROJECT_DESCRIPTION}
+      APP_PORT: ${APP_PORT}
+      VERSION: ${VERSION}
+      PRETRAINED_MODEL_CACHE_DIR: ${PRETRAINED_MODEL_CACHE_DIR}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: ${REDIS_PASSWORD}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     depends_on:
       - database
       - redis

@@ -8,15 +8,15 @@ settings = get_settings()
 
 pretrained_model = 'sentence-transformers/paraphrase-multilingual-mpnet-base-v2'
 
-# # Load model from HuggingFace Hub
-# tokenizer = AutoTokenizer.from_pretrained(
-#     pretrained_model_name_or_path=pretrained_model,
-#     cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
-# )
-# model = AutoModel.from_pretrained(
-#     pretrained_model_name_or_path=pretrained_model,
-#     cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
-# )
+# Load model from HuggingFace Hub
+tokenizer = AutoTokenizer.from_pretrained(
+    pretrained_model_name_or_path=pretrained_model,
+    cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
+)
+model = AutoModel.from_pretrained(
+    pretrained_model_name_or_path=pretrained_model,
+    cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,
+)
 
 
 # Mean Pooling - Take attention mask into account for correct averaging

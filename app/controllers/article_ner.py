@@ -1,25 +1,27 @@
-from numpy import dot
+from typing import List, Dict, Union
+
+import numpy as np
 from numpy.linalg import norm
 from nltk import ngrams
-import vectorization
-# import sentiment
-import sample_articles_content
-import utils
+from controllers import vectorization, sample_articles_content
+
 import requests
 import json
-from pprint import pprint
 
+from loguru import logger
 
-logger = utils.get_logger('article.py', 'log.txt')
 NGRAM_LENGTH = 12
 THRESHOLD_SIMILARITY_MIN_FOR_NGRAM = 0.6
 
 
-def get_cosine_similarity(v1, v2):
-    return dot(v1, v2)/(norm(v1)*norm(v2))
+def get_cosine_similarity(v1: np.ndarray, v2: np.ndarray):
+    """Рассчитывает косинусную близость"""
+    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
 
 
 class Ngram:
+    url = 'https://morescience.app/api/translate'
+
     def __init__(self, ngram: list):
         self.ngram_lst = ngram
         self.ngram_str = ' '.join(ngram)
@@ -33,12 +35,12 @@ class Ngram:
         return vector
 
     def get_translate(self):
-        r = requests.post('https://morescience.app/api/translate', json={'string': self.ngram_str})
+        r = requests.post(self.url, json={'string': self.ngram_str})
         translated = r.text
         self.translated = translated
 
     def get_ner_sentiment(self):
-        r = requests.post('https://morescience.app/api/sentiment', json={'string': self.translated})
+        r = requests.post(self.url, json={'string': self.translated})
         sentiment = json.loads(r.text)
         self.ner_sentiment = sentiment
 
@@ -56,8 +58,9 @@ class Ngram:
         return self.ngram_str
 
 
-class Article:
-    def __init__(self, text: str, type_: bool, ngram_length: int = NGRAM_LENGTH):
+class ArticleNer:
+    def __init__(self, text: str, type_: bool,
+                 ngram_length: int = NGRAM_LENGTH):
         self.text = text
         self.type = type_  # true or false
         logger.info(f'type = {self.type}')
@@ -92,12 +95,13 @@ class NgramPair:
         self.ngram_false = ngram_false
 
     def print(self):
-        print(f'ngram_false = {self.ngram_false.ngram_str}\ngram_true = {self.ngram_true.ngram_str}\n\n')
+        print(f'ngram_false = {self.ngram_false.ngram_str}\n'
+              f'gram_true = {self.ngram_true.ngram_str}\n\n')
 
 
 class ArticlePair:
-    def __init__(self, article_1: Article, article_2: Article):
-        if article_1.type == True:
+    def __init__(self, article_1: ArticleNer, article_2: ArticleNer):
+        if article_1.type:
             self.article_true = article_1
             self.article_false = article_2
         else:
@@ -113,12 +117,11 @@ class ArticlePair:
     def get_closest_ngram(self, ngram_false):
         similarities = dict()
         for ngram_true in self.article_true.ngrams:
-            similarities[get_cosine_similarity(ngram_false.vector, ngram_true.vector)] = ngram_true
+            similarities[get_cosine_similarity(ngram_false.vector,
+                                               ngram_true.vector)] = ngram_true
 
         if max(similarities.keys()) < THRESHOLD_SIMILARITY_MIN_FOR_NGRAM:
             return ngram_false
-
-        # pprint(similarities)
 
         max_similarity = max(similarities.keys())
         return similarities[max_similarity]
@@ -132,7 +135,7 @@ class ArticlePair:
 
         return ngram_pairs
 
-    def compare_pairs(self):
+    def compare_pairs(self) -> List[Dict[str, Union[str, int]]]:
         result = list()
         for ngram_pair in self.ngram_pairs:
             ngram_pair.ngram_true.get_translate()
@@ -146,17 +149,24 @@ class ArticlePair:
 
             ner_sentiment_entities_true = ngram_pair.ngram_true.entities
             ner_sentiment_entities_false = ngram_pair.ngram_false.entities
-            intersection = set(ner_sentiment_entities_true) & set(ner_sentiment_entities_false)
+            intersection = set(ner_sentiment_entities_true) & set(
+                ner_sentiment_entities_false)
             coef = len(intersection) / len(ner_sentiment_entities_true)
-            result.append({'text': ngram_pair.ngram_false.ngram_str, 'truth': coef})
+            result.append(
+                {'text': ngram_pair.ngram_false.ngram_str, 'truth': coef})
 
         return result
 
 
-test = True
-if test:
-    article_true = Article(sample_articles_content.article_true_string, type_=True)
-    article_false = Article(sample_articles_content.article_false_string, type_=False)
+def main():
+    article_true = ArticleNer(sample_articles_content.article_true_string,
+                              type_=True)
+    article_false = ArticleNer(sample_articles_content.article_false_string,
+                               type_=False)
 
     article_pair = ArticlePair(article_true, article_false)
-    pprint(article_pair.result)
+    logger.info(article_pair.result)
+
+
+if __name__ == '__main__':
+    main()

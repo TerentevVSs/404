@@ -3,10 +3,10 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from config import get_settings
-from db.engine import create_db
 from routers.checking_fakes import router as checking_fakes_router
 from routers.vectorization import router as vectorization_router
-
+from routers.fake_detection_ner_sentiment import router as ner_router
+from controllers.parser.mos_ru import main as parse_main
 settings = get_settings()
 
 
@@ -27,7 +27,8 @@ def get_application() -> FastAPI:
     application.include_router(router=vectorization_router, prefix='/vectors')
     application.include_router(router=checking_fakes_router,
                                prefix='/checking-fakes')
-
+    application.include_router(router=ner_router, prefix='/ner')
+    parse_main()
     return application
 
 

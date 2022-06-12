@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import datetime, timedelta
 from typing import Union, List, Optional, Dict
@@ -6,9 +7,11 @@ import requests
 
 from loguru import logger
 from sqlalchemy.orm import Session
+
+from controllers.vectorization import get_vector
 from db.engine import Session as SessionLocal
 
-from db import Article
+from db import Article, VectorArticle
 
 from workers.core import celery as celery_app
 
@@ -70,10 +73,16 @@ class MosRuParser:
                 continue
             text = self.get_article_text(id=external_id)
             if text:
-                db.add(Article(content=text,
-                               source_id=self.source_id,
-                               external_id=str(item['id'])))
-        db.commit()
+                article = Article(content=text,
+                                  source_id=self.source_id,
+                                  external_id=str(item['id']))
+                db.add(article)
+                db.commit()
+                db.refresh(article)
+                vector = json.dumps(get_vector(text=text))
+                v_article = VectorArticle(vector=vector, article=article)
+                db.add(v_article)
+                db.commit()
 
     def add_last_articles(self, db: Session):
         data = self.get_article_ids()
@@ -84,12 +93,23 @@ class MosRuParser:
             logger.error('Data not found!')
 
 
+URL = 'https://www.mos.ru/api/newsfeed/v4/frontend/json/ru/articles'
+
+
 @celery_app.task(bind=True, name='download_all_articles_mos_ru')
 def download_all_articles_mos_ru(self):
     session = SessionLocal()
-    url = 'https://www.mos.ru/api/newsfeed/v4/frontend/json/ru/articles'
-    parser = MosRuParser(url=url, source_id=1)
+    parser = MosRuParser(url=URL, source_id=1)
     date_from = datetime.now() - timedelta(days=270)
+    date_to = datetime.now()
+    parser.create_articles(db=session, date_from=date_from, date_to=date_to)
+
+
+@celery_app.task(bind=True, name='download_last_articles_mos_ru')
+def download_last_articles_mos_ru(self):
+    session = SessionLocal()
+    parser = MosRuParser(url=URL, source_id=1)
+    date_from = datetime.now() - timedelta(days=1)
     date_to = datetime.now()
     parser.create_articles(db=session, date_from=date_from, date_to=date_to)
 

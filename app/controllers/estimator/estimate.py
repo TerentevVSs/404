@@ -1,22 +1,29 @@
+from pathlib import Path
+from typing import List
+
 import torch
 from transformers import BertForSequenceClassification, BertTokenizer
 
+from config import get_settings
 from controllers.estimator.module import ArticleEstimator
+
+settings = get_settings()
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # Будем использовать русскоязычный BERT от Сбербанка
-trained_model_name = "/data/Models/ruBERT_8k_2L_20_epochs.pt"
 sber_model_name = "sberbank-ai/ruBert-base"
-tokenizer = BertTokenizer.from_pretrained(sber_model_name)
-bert_model = BertForSequenceClassification.from_pretrained(sber_model_name)
+tokenizer = BertTokenizer.from_pretrained(sber_model_name,
+                                          cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,)
+bert_model = BertForSequenceClassification.from_pretrained(sber_model_name,
+                                                           cache_dir=settings.PRETRAINED_MODEL_CACHE_DIR,)
 bert_model = bert_model.to(device)
 
 model = ArticleEstimator(bert_model=bert_model).to(device)
-model.load_state_dict(torch.load(trained_model_name))
+model.load_state_dict(torch.load(Path(settings.PRETRAINED_MODEL_CACHE_DIR, "ruBert.pt")))
 model.eval()
 
 
-def generate_character_mask(ids, mask, tokenizer):
+def generate_character_mask(ids: List, mask, tokenizer):
     """
     Вычисляем посимвольную маску фейковости каждого слова
     Parameters
