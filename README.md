@@ -70,15 +70,20 @@ ENV_FILE=.env python main.py
 gunicorn gunicorn_app:app --workers 1  --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.:8080
 ```
 
-#### Docker Way
-
-Coming soon...
-
 
 #### Docker Compose Way 
 
-Coming soon....
+Перед запуском через Docker Compose также необходимо создать файл с перменными 
+окружения `.env` или экспортировать их в среду. 
 
+**ВАЖНО:** Для правильной работы в docker-compose без внешнего порта для БД, 
+назначьте `POSTGRES_HOST=database`.
+
+Для запуска проекта со всеми сервисами одновременно необходимо выполнить
+
+```bash
+docker-compose  up --build
+```
 
 ---
 ### Миграции

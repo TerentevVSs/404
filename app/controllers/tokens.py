@@ -2,8 +2,11 @@ import os
 import random
 import pandas as pd
 
+default_path = os.path.join('..', '..', 'data', 'token_clusters.csv')
+
+
 class Tokens:
-    def __init__(self, filepath=os.path.join('..', '..','data', 'token_clusters.csv')):
+    def __init__(self, filepath=default_path):
         self.filepath = filepath
         self.df = self.load_tokens()
         self.mapping_by_cluster = self.create_mapping_by_cluster()
@@ -36,6 +39,7 @@ class Tokens:
         cluster = self.get_cluster(token_id)
         random_token = self.get_token_id_from_cluster(cluster)
         return random_token
+
 
 test = False
 if test:

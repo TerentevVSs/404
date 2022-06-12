@@ -1,20 +1,18 @@
-from typing import Tuple
-
 import torch
-import torch.nn as nn
 from transformers import BertForSequenceClassification, BertTokenizer
 
+from controllers.estimator.module import ArticleEstimator
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # Будем использовать русскоязычный BERT от Сбербанка
-tokenizer = BertTokenizer.from_pretrained("sberbank-ai/ruBert-base")
-bert_model = BertForSequenceClassification.from_pretrained(
-    "sberbank-ai/ruBert-base")
+trained_model_name = "/data/Models/ruBERT_8k_2L_20_epochs.pt"
+sber_model_name = "sberbank-ai/ruBert-base"
+tokenizer = BertTokenizer.from_pretrained(sber_model_name)
+bert_model = BertForSequenceClassification.from_pretrained(sber_model_name)
 bert_model = bert_model.to(device)
 
 model = ArticleEstimator(bert_model=bert_model).to(device)
-model_name = "ruBERT_8k_2L_20_epochs.pt"
-model.load_state_dict(torch.load(f"/data/Models/{model_name}"))
+model.load_state_dict(torch.load(trained_model_name))
 model.eval()
 
 

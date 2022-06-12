@@ -4,7 +4,7 @@ from ipaddress import IPv4Address
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from pydantic import BaseSettings, PostgresDsn, validator
+from pydantic import BaseSettings, PostgresDsn, validator, RedisDsn
 
 
 class Settings(BaseSettings):
@@ -30,6 +30,41 @@ class Settings(BaseSettings):
             return v
         return PostgresDsn.build(
             scheme='postgresql',
+            user=values.get('POSTGRES_USER'),
+            password=values.get('POSTGRES_PASSWORD'),
+            host=values.get('POSTGRES_HOST'),
+            path=f"/{values.get('POSTGRES_DB') or ''}",
+            port=f"{values.get('POSTGRES_PORT') or ''}",
+        )
+
+    REDIS_HOST: str
+    REDIS_PORT: str
+    REDIS_PASSWORD: str
+
+    REDIS_URI: Optional[RedisDsn] = None
+
+    @validator('REDIS_URI', pre=True)
+    def assemble_redis_uri(cls, v: Optional[str],
+                           values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return RedisDsn.build(
+            scheme='redis',
+            host=values.get('REDIS_HOST'),
+            port=values.get('REDIS_PORT'),
+            password=values.get('REDIS_PASSWORD'),
+            path=f"/1",
+        )
+
+    CELERY_DBURI: Optional[PostgresDsn] = None
+
+    @validator('CELERY_DBURI', pre=True)
+    def assemble_celery_dburi(cls, v: Optional[str],
+                                   values: Dict[str, Any]) -> Any:
+        if isinstance(v, str):
+            return v
+        return PostgresDsn.build(
+            scheme='postgresql+psycopg2',
             user=values.get('POSTGRES_USER'),
             password=values.get('POSTGRES_PASSWORD'),
             host=values.get('POSTGRES_HOST'),

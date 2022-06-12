@@ -7,9 +7,9 @@ from db.base import Base
 
 class Source(Base):
     """Источник данных - Элемент white list"""
-    title = Column(String(128), index=True, nullable=False)
+    title = Column(String(128), nullable=False)
     description = Column(String(512), nullable=True)
-    base_url = Column(String, index=True, nullable=True)
+    base_url = Column(String, nullable=True)
 
     articles = relationship('Article', back_populates='source')
 
@@ -17,14 +17,13 @@ class Source(Base):
 class Article(Base):
     """Статья (содержимое)"""
     __table_args__ = (UniqueConstraint('source_id', 'external_id', name='_source_external_uc'),)
-    content = Column(String, nullable=False, index=True)
+    content = Column(String, nullable=False)
     source_id = Column(ForeignKey('source.id'))
-    external_id = Column(Integer, nullable=False, index=True)
+    external_id = Column(String, nullable=False)
 
     source = relationship("Source", back_populates="articles")
     vector = relationship("VectorArticle", back_populates="article",
                           uselist=False)
-    f = Column(Boolean, default=True)
     suspicious_articles = relationship("SuspiciousArticle", back_populates="article",)
 
 
@@ -42,7 +41,7 @@ class SuspiciousArticle(Base):
 
 class VectorArticle(Base):
     """Статья (токенизированная)"""
-    vector = Column(String, nullable=False, index=True)  # json.dumps
+    vector = Column(String, nullable=False)  # json.dumps
     article_id = Column(ForeignKey('article.id'), index=True, nullable=False,
                         unique=True)
 

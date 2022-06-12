@@ -1,12 +1,13 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends
+from loguru import logger
 from sqlalchemy.orm import Session
 
-from db import Article, SuspiciousArticle
+from db import SuspiciousArticle
 from db.engine import get_session
-from db.schemas import SuspiciousArticleBase, SuspiciousArticle as SuspiciousArticleSchema
-from loguru import logger
+from db.schemas import SuspiciousArticleBase, \
+    SuspiciousArticle as SuspiciousArticleSchema
 
 router = APIRouter(tags=['checking fakes'])
 
@@ -26,3 +27,6 @@ def check_article(suspicious_article: SuspiciousArticleBase,
     suspicious_article.percentage = 0.3
     suspicious_article.answer = 'библия'
     return suspicious_article
+
+
+

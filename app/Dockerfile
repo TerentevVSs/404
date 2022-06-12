@@ -34,4 +34,3 @@ EXPOSE ${APP_PORT}
 
 ADD . /app
 RUN /bin/sh /app/create_env.sh > /etc/sysconfig/backend
-CMD ["/sbin/init"]

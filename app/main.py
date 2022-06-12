@@ -27,7 +27,6 @@ def get_application() -> FastAPI:
     application.include_router(router=vectorization_router, prefix='/vectors')
     application.include_router(router=checking_fakes_router,
                                prefix='/checking-fakes')
-    application.add_event_handler("startup", create_db)
 
     return application
 
