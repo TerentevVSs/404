@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, HttpUrl
 
@@ -49,6 +49,19 @@ class SuspiciousArticle(SuspiciousArticleBase):
 
     class Config:
         orm_mode = True
+
+
+class NgramPairCoef(BaseModel):
+    text_false: str
+    truth: float
+    text_true: str
+
+
+class Answer(BaseModel):
+    suspicious_content: str
+    percentage: float
+    article: str
+    result: List[NgramPairCoef]
 
 
 class VectorArticleBase(BaseModel):

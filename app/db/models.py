@@ -18,7 +18,7 @@ class Article(Base):
     """Статья (содержимое)"""
     __table_args__ = (UniqueConstraint('source_id', 'external_id', name='_source_external_uc'),)
     content = Column(String, nullable=False)
-    source_id = Column(ForeignKey('source.id'))
+    source_id = Column(ForeignKey('source.id'), index=True, nullable=False)
     external_id = Column(String, nullable=False)
 
     source = relationship("Source", back_populates="articles")

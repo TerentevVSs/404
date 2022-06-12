@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import List, Dict, Union
 
 import numpy as np
@@ -89,10 +90,10 @@ class ArticleNer:
         return ngrams_
 
 
+@dataclass
 class NgramPair:
-    def __init__(self, ngram_true, ngram_false):
-        self.ngram_true = ngram_true
-        self.ngram_false = ngram_false
+    ngram_true: Ngram
+    ngram_false: Ngram
 
     def print(self):
         print(f'ngram_false = {self.ngram_false.ngram_str}\n'
@@ -135,7 +136,8 @@ class ArticlePair:
 
         return ngram_pairs
 
-    def compare_pairs(self) -> List[Dict[str, Union[str, int]]]:
+    def compare_pairs(self) -> Dict[
+        str, Union[List[Dict[str, Union[str, float]]], float]]:
         result = list()
         for ngram_pair in self.ngram_pairs:
             ngram_pair.ngram_true.get_translate()
@@ -153,9 +155,9 @@ class ArticlePair:
                 ner_sentiment_entities_false)
             coef = len(intersection) / len(ner_sentiment_entities_true)
             result.append(
-                {'text': ngram_pair.ngram_false.ngram_str, 'truth': coef})
+                {'text': ngram_pair.ngram_false.ngram_str, 'truth': coef,})
 
-        return result
+        return {'ngrams': result, 'percent': 0.222}
 
 
 def main():
