@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from controllers import sample_articles_content
-from controllers.articlener import ArticleNer, ArticlePair
+from controllers.article_ner import ArticleNer, ArticlePair
 from db.schemas import VectorArticleOutput
 
 router = APIRouter(tags=['Fake News'])
