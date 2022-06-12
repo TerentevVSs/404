@@ -1,6 +1,12 @@
 # 404
 
 ----
+## Эксперименты с моделью:
+
+Experiments/BERT_training.ipynb
+
+Логи экспериментов на wandb.ai
+https://wandb.ai/diht404/ruBERT?workspace=user-diht404
 
 
 ## Запуск проекта локально
