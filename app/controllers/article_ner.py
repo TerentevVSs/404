@@ -12,7 +12,7 @@ import json
 from loguru import logger
 
 NGRAM_LENGTH = 12
-THRESHOLD_SIMILARITY_MIN_FOR_NGRAM = 0.6
+THRESHOLD_SIMILARITY_MIN_FOR_NGRAM = 0.8
 
 
 def get_cosine_similarity(v1: np.ndarray, v2: np.ndarray):
@@ -48,7 +48,8 @@ class Ngram:
     def get_entities(self):
         entities = list()
         for entity in self.ner_sentiment['entities']:
-            entities.append(entity['name'])
+            entities.append({'name': entity['name'],
+                             'salience': entity['salience']})
 
         self.entities = entities
 
@@ -118,14 +119,15 @@ class ArticlePair:
     def get_closest_ngram(self, ngram_false):
         similarities = dict()
         for ngram_true in self.article_true.ngrams:
-            similarities[get_cosine_similarity(ngram_false.vector,
-                                               ngram_true.vector)] = ngram_true
-
-        if max(similarities.keys()) < THRESHOLD_SIMILARITY_MIN_FOR_NGRAM:
-            return ngram_false
+            similarities[get_cosine_similarity(ngram_false.vector, ngram_true.vector)] = ngram_true
 
         max_similarity = max(similarities.keys())
-        return similarities[max_similarity]
+        if max_similarity < THRESHOLD_SIMILARITY_MIN_FOR_NGRAM:
+            # print('None')
+            return ngram_false, 'not found'
+
+        # print(similarities[max_similarity])
+        return similarities[max_similarity], 'found'
 
     def get_ngram_pairs(self):
         ngram_pairs = list()
@@ -136,9 +138,13 @@ class ArticlePair:
 
         return ngram_pairs
 
-    def compare_pairs(self) -> Dict[
-        str, Union[List[Dict[str, Union[str, float]]], float]]:
+    def get_average_weighted(self, values, weights):
+        average_weighted = np.average(values, weights=weights)
+        return average_weighted
+
+    def compare_pairs(self):
         result = list()
+        saliences = list()
         for ngram_pair in self.ngram_pairs:
             ngram_pair.ngram_true.get_translate()
             ngram_pair.ngram_false.get_translate()
@@ -151,13 +157,34 @@ class ArticlePair:
 
             ner_sentiment_entities_true = ngram_pair.ngram_true.entities
             ner_sentiment_entities_false = ngram_pair.ngram_false.entities
-            intersection = set(ner_sentiment_entities_true) & set(
-                ner_sentiment_entities_false)
-            coef = len(intersection) / len(ner_sentiment_entities_true)
-            result.append(
-                {'text': ngram_pair.ngram_false.ngram_str, 'truth': coef,})
 
-        return {'ngrams': result, 'percent': 0.222}
+            ner_sentiment_entities_true_names = [i['name'] for i in ner_sentiment_entities_true]
+            ner_sentiment_entities_false_names = [i['name'] for i in ner_sentiment_entities_false]
+
+            ner_sentiment_entities_true_salience = [i['salience'] for i in ner_sentiment_entities_true]
+            ner_sentiment_entities_false_salience = [i['salience'] for i in ner_sentiment_entities_false]
+
+            salience = np.median(ner_sentiment_entities_true_salience + ner_sentiment_entities_false_salience)
+            saliences.append(salience)
+
+            intersection = set(ner_sentiment_entities_true_names) & set(ner_sentiment_entities_false_names)
+            coef = len(intersection) / len(ner_sentiment_entities_true)
+
+            text_true = ngram_pair.ngram_true.ngram_str
+            if ngram_pair.status == 'not found':
+                text_true = ''
+
+            # if ngram_pair.status == 'found':
+            #     print()
+
+            result.append({'text_false': ngram_pair.ngram_false.ngram_str,
+                           'text_true': text_true,
+                           'truth': coef})
+
+        # percent = np.median([i['truth'] for i in result])
+        percent = self.get_average_weighted([i['truth'] for i in result], saliences)
+
+        return {'ngrams': result, 'percent': percent}
 
 
 def main():
