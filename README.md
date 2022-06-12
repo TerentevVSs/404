@@ -1,11 +1,15 @@
 # 404
 
 ----
-## Эксперименты с моделью:
+## Эксперименты:
 
+Разработка кластеризации:
+Experiments/fast_kmeans_via_faiss.ipynb
+
+Разработка модели:
 Experiments/BERT_training.ipynb
 
-Логи экспериментов на wandb.ai
+Логи экспериментов с моделью на wandb.ai
 https://wandb.ai/diht404/ruBERT?workspace=user-diht404
 
 
