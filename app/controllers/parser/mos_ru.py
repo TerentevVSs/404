@@ -86,6 +86,7 @@ class MosRuParser:
                 v_article = VectorArticle(vector=vector, article=article)
                 db.add(v_article)
                 db.commit()
+            logger.warning(f'Added element {item["id"]}')
 
     def add_last_articles(self, db: Session):
         data = self.get_article_ids()
