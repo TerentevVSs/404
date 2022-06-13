@@ -5,3 +5,4 @@ max_requests = 1000
 worker_class = 'uvicorn.workers.UvicornWorker'
 workers = int(environ.get('APP_WORKERS', 1))
 worker_timeout = 600
+timeout=600
