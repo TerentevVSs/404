@@ -29,7 +29,6 @@ class MosRuParser:
 
     def get_article_text(self, id: Union[int, str]) -> Optional[str]:
         response = requests.get(f'{self.url}/{id}')
-        logger.info(response.text)
         if response.ok:
             return clean_text(response.json()['full_text'])
         return None
@@ -102,6 +101,7 @@ def download_all_articles_mos_ru(self):
     parser = MosRuParser(url=URL, source_id=1)
     date_from = datetime.now() - timedelta(days=270)
     date_to = datetime.now()
+    logger.info("Started")
     parser.create_articles(db=session, date_from=date_from, date_to=date_to)
 
 
