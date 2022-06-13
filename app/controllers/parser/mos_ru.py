@@ -62,7 +62,7 @@ class MosRuParser:
             'to': date_to,
             'per-page': 50,
             'page': page,
-            'sort': '-date',
+            'sort': 'date',
         })
         if response.ok:
             return response.json()
