@@ -32,8 +32,8 @@ def get_application() -> FastAPI:
 
     application.mount("/static", StaticFiles(directory="frontend/static"),
                       name='static')
-    from controllers.parser.mos_ru import main as mos_ru_main
-    mos_ru_main()
+    # from controllers.parser.mos_ru import main as mos_ru_main
+    # mos_ru_main()
     return application
 
 
