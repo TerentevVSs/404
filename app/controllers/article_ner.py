@@ -1,18 +1,16 @@
+import json
 from dataclasses import dataclass
-from typing import List, Dict, Union
 
 import numpy as np
-from numpy.linalg import norm
+import requests
+from loguru import logger
 from nltk import ngrams
+from numpy.linalg import norm
+
 from controllers import vectorization, sample_articles_content
 
-import requests
-import json
-
-from loguru import logger
-
 NGRAM_LENGTH = 12
-THRESHOLD_SIMILARITY_MIN_FOR_NGRAM = 0.8
+THRESHOLD_SIMILARITY_MIN_FOR_NGRAM = -1
 
 
 def get_cosine_similarity(v1: np.ndarray, v2: np.ndarray):
@@ -21,7 +19,8 @@ def get_cosine_similarity(v1: np.ndarray, v2: np.ndarray):
 
 
 class Ngram:
-    url = 'https://morescience.app/api/translate'
+    url_translate = 'https://morescience.app/api/translate'
+    url_sentiment = 'https://morescience.app/api/sentiment'
 
     def __init__(self, ngram: list):
         self.ngram_lst = ngram
@@ -36,12 +35,13 @@ class Ngram:
         return vector
 
     def get_translate(self):
-        r = requests.post(self.url, json={'string': self.ngram_str})
+        r = requests.post(self.url_translate, json={'string': self.ngram_str})
         translated = r.text
         self.translated = translated
 
     def get_ner_sentiment(self):
-        r = requests.post(self.url, json={'string': self.translated})
+        r = requests.post(self.url_sentiment, json={'string': self.translated})
+
         sentiment = json.loads(r.text)
         self.ner_sentiment = sentiment
 
@@ -95,6 +95,7 @@ class ArticleNer:
 class NgramPair:
     ngram_true: Ngram
     ngram_false: Ngram
+    status: str
 
     def print(self):
         print(f'ngram_false = {self.ngram_false.ngram_str}\n'
@@ -119,7 +120,8 @@ class ArticlePair:
     def get_closest_ngram(self, ngram_false):
         similarities = dict()
         for ngram_true in self.article_true.ngrams:
-            similarities[get_cosine_similarity(ngram_false.vector, ngram_true.vector)] = ngram_true
+            similarities[get_cosine_similarity(ngram_false.vector,
+                                               ngram_true.vector)] = ngram_true
 
         max_similarity = max(similarities.keys())
         if max_similarity < THRESHOLD_SIMILARITY_MIN_FOR_NGRAM:
@@ -132,8 +134,9 @@ class ArticlePair:
     def get_ngram_pairs(self):
         ngram_pairs = list()
         for ngram_false in self.article_false.ngrams:
-            ngram_true_closest = self.get_closest_ngram(ngram_false)
-            ngram_pair = NgramPair(ngram_true_closest, ngram_false)
+            ngram_true_closest, status = self.get_closest_ngram(ngram_false)
+            ngram_pair = NgramPair(ngram_true=ngram_true_closest,
+                                   ngram_false=ngram_false, status=status)
             ngram_pairs.append(ngram_pair)
 
         return ngram_pairs
@@ -158,16 +161,22 @@ class ArticlePair:
             ner_sentiment_entities_true = ngram_pair.ngram_true.entities
             ner_sentiment_entities_false = ngram_pair.ngram_false.entities
 
-            ner_sentiment_entities_true_names = [i['name'] for i in ner_sentiment_entities_true]
-            ner_sentiment_entities_false_names = [i['name'] for i in ner_sentiment_entities_false]
+            ner_sentiment_entities_true_names = [i['name'] for i in
+                                                 ner_sentiment_entities_true]
+            ner_sentiment_entities_false_names = [i['name'] for i in
+                                                  ner_sentiment_entities_false]
 
-            ner_sentiment_entities_true_salience = [i['salience'] for i in ner_sentiment_entities_true]
-            ner_sentiment_entities_false_salience = [i['salience'] for i in ner_sentiment_entities_false]
+            ner_sentiment_entities_true_salience = [i['salience'] for i in
+                                                    ner_sentiment_entities_true]
+            ner_sentiment_entities_false_salience = [i['salience'] for i in
+                                                     ner_sentiment_entities_false]
 
-            salience = np.median(ner_sentiment_entities_true_salience + ner_sentiment_entities_false_salience)
+            salience = np.median(
+                ner_sentiment_entities_true_salience + ner_sentiment_entities_false_salience)
             saliences.append(salience)
 
-            intersection = set(ner_sentiment_entities_true_names) & set(ner_sentiment_entities_false_names)
+            intersection = set(ner_sentiment_entities_true_names) & set(
+                ner_sentiment_entities_false_names)
             coef = len(intersection) / len(ner_sentiment_entities_true)
 
             text_true = ngram_pair.ngram_true.ngram_str
@@ -182,9 +191,10 @@ class ArticlePair:
                            'truth': coef})
 
         # percent = np.median([i['truth'] for i in result])
-        percent = self.get_average_weighted([i['truth'] for i in result], saliences)
+        percent = self.get_average_weighted([i['truth'] for i in result],
+                                            saliences)
 
-        return {'ngrams': result, 'percent': percent}
+        return {'ngrams': result, 'percentage': percent}
 
 
 def main():

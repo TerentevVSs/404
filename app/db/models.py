@@ -30,8 +30,7 @@ class Article(Base):
 class SuspiciousArticle(Base):
     """Подозрительная статья (для проверки)"""
     content = Column(String)
-    article_id = Column(ForeignKey('article.id'), index=True, nullable=True,
-                        unique=True)
+    article_id = Column(ForeignKey('article.id'), index=True, nullable=True,)
     flag = Column(Boolean)  # True - Truth, False - Fake
     percentage = Column(Float)
     answer = Column(String)  # json.dumps

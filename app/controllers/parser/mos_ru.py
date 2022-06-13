@@ -115,12 +115,7 @@ def download_last_articles_mos_ru(self):
 
 
 def main():
-    session = SessionLocal()
-    url = 'https://www.mos.ru/api/newsfeed/v4/frontend/json/ru/articles'
-    parser = MosRuParser(url=url, source_id=1)
-    date_from = datetime.now() - timedelta(days=1)
-    date_to = datetime.now()
-    parser.create_articles(db=session, date_from=date_from, date_to=date_to)
+    download_all_articles_mos_ru.delay()
 
 
 if __name__ == '__main__':
