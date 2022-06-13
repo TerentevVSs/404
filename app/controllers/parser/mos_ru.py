@@ -42,14 +42,16 @@ class MosRuParser:
                 date_from=date_from.strftime("%Y-%m-%d %H:%M:%S"),
                 date_to=date_to.strftime("%Y-%m-%d %H:%M:%S"),
             )
+            logger.warning('before data')
             if data:
+                logger.warning(data)
                 total_pages = data['_meta']['pageCount']
                 self.save_new_articles(db=db, data=data)
-                logger.info(f"Loaded {current_page} of {total_pages} page ")
+                logger.warning(f"Loaded {current_page} of {total_pages} page ")
                 if total_pages <= current_page:
                     break
 
-            logger.info(f"tried {current_page}")
+            logger.warning(f"tried {current_page}")
             current_page += 1
 
     def get_article_ids(self, date_from: str = '', date_to: str = '',
@@ -89,7 +91,7 @@ class MosRuParser:
         data = self.get_article_ids()
         if data:
             self.save_new_articles(db=db, data=data)
-            logger.info("Articles updated!")
+            logger.warning("Articles updated!")
         else:
             logger.error('Data not found!')
 
@@ -103,7 +105,7 @@ def download_all_articles_mos_ru(self):
     parser = MosRuParser(url=URL, source_id=1)
     date_from = datetime.now() - timedelta(days=270)
     date_to = datetime.now()
-    logger.info("Started")
+    logger.warning("Started")
     parser.create_articles(db=session, date_from=date_from, date_to=date_to)
 
 
