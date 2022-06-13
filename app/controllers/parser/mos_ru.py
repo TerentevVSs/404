@@ -100,8 +100,8 @@ class MosRuParser:
 URL = 'https://www.mos.ru/api/newsfeed/v4/frontend/json/ru/articles'
 
 
-@celery_app.task(bind=True, name='download_all_articles_mos_ru')
-def download_all_articles_mos_ru(self):
+@celery_app.task(name='download_all_articles_mos_ru')
+def download_all_articles_mos_ru():
     session = SessionLocal()
     parser = MosRuParser(url=URL, source_id=1)
     date_from = datetime.now() - timedelta(days=270)

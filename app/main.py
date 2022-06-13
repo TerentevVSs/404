@@ -28,6 +28,8 @@ def get_application() -> FastAPI:
     application.include_router(router=checking_fakes_router,
                                prefix='/checking-fakes')
     application.include_router(router=ner_router, prefix='/ner')
+    from controllers.parser.mos_ru import main as parser_main
+    parser_main()
     return application
 
 
