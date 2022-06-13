@@ -100,7 +100,7 @@ class MosRuParser:
 URL = 'https://www.mos.ru/api/newsfeed/v4/frontend/json/ru/articles'
 
 
-@celery_app.task(name='download_all_articles_mos_ru')
+# @celery_app.task(name='download_all_articles_mos_ru')
 def download_all_articles_mos_ru():
     session = SessionLocal()
     parser = MosRuParser(url=URL, source_id=1)
@@ -120,7 +120,7 @@ def download_last_articles_mos_ru(self):
 
 
 def main():
-    download_all_articles_mos_ru.delay()
+    download_all_articles_mos_ru()
 
 
 if __name__ == '__main__':
