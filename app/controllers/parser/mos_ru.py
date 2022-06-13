@@ -13,7 +13,7 @@ from db.engine import Session as SessionLocal
 
 from db import Article, VectorArticle
 
-from workers.core import celery as celery_app
+from celery import current_app as celery_app
 
 
 def clean_text(text: str) -> str:
