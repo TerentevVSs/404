@@ -62,6 +62,7 @@ class Answer(BaseModel):
     percentage: float
     article: str
     result: List[NgramPairCoef]
+    source: str
 
 
 class VectorArticleBase(BaseModel):

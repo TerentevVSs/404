@@ -17,7 +17,7 @@ from celery import current_app as celery_app
 
 
 def clean_text(text: str) -> str:
-    return re.sub('(&\w*;)|(<[^>]*>)', '', text)
+    return re.sub('(&\w*;)|(<[^>]*>)', '', text).strip()
 
 
 class MosRuParser:

@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 
 from config import get_settings
 from routers.checking_fakes import router as checking_fakes_router
@@ -28,8 +29,9 @@ def get_application() -> FastAPI:
     application.include_router(router=checking_fakes_router,
                                prefix='/checking-fakes')
     application.include_router(router=ner_router, prefix='/ner')
-    from controllers.parser.mos_ru import main as parser_main
-    parser_main()
+
+    application.mount("/static", StaticFiles(directory="frontend/static"),
+                      name='static')
     return application
 
 

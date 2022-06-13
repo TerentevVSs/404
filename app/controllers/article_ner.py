@@ -35,11 +35,13 @@ class Ngram:
         return vector
 
     def get_translate(self):
+        """Получаем данные через прокси из Google Natural Language API"""
         r = requests.post(self.url_translate, json={'string': self.ngram_str})
         translated = r.text
         self.translated = translated
 
     def get_ner_sentiment(self):
+        """Получаем данные через прокси из Google Natural Language API"""
         r = requests.post(self.url_sentiment, json={'string': self.translated})
 
         sentiment = json.loads(r.text)
